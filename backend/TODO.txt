@@ -1,0 +1,29 @@
+Backend (Laptop — Flask + SQLite)
+
+API endpoints ESP32 calls:
+POST /scan — receives RFID scan, returns user data
+POST /manual — receives manual input, logs to DB
+POST /environment — receives DHT11 data, stores it
+GET /status — tablet polls this for real-time updates
+SQLite tables:
+users — RFID UID, name, ID number, photo path
+attendance — timestamp, name, ID, entry type (RFID/manual)
+environment — timestamp, temperature, humidity
+
+
+#####################################################
+
+Flask
+
+app.py
+├── /scan (POST)
+│   ├── Receive UID
+│   ├── Query users table
+│   └── Return user data or "not found"
+├── /manual (POST)
+│   ├── Receive name, ID, purpose
+│   └── Log to attendance table as manual entry
+├── /environment (POST)
+│   └── Store temp + humidity
+└── /status (GET)
+    └── Returns current system state to tablet

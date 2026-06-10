@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Attendance Backend Tester</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      font-size: 14px;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      padding: 24px;
+    }
+
+    h1 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+    .subtitle { font-size: 13px; color: #666; margin-bottom: 24px; }
+
+    .config-bar {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .config-bar label { font-size: 13px; color: #555; white-space: nowrap; }
+    .config-bar input {
+      flex: 1;
+      min-width: 180px;
+      padding: 6px 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-header h2 { font-size: 14px; font-weight: 600; flex: 1; }
+    .method {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: .04em;
+    }
+    .post { background: #fff3e0; color: #e65100; }
+    .get  { background: #e8f5e9; color: #2e7d32; }
+
+    .route-badge {
+      font-size: 12px;
+      color: #555;
+      font-family: monospace;
+      background: #f5f5f5;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .card-body { padding: 14px 16px; }
+
+    .field { margin-bottom: 10px; }
+    .field label { display: block; font-size: 12px; color: #555; margin-bottom: 4px; }
+    .field input {
+      width: 100%;
+      padding: 7px 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    .field input:focus { outline: none; border-color: #888; }
+
+    button.send {
+      width: 100%;
+      padding: 8px;
+      background: #1a1a1a;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    button.send:hover { background: #333; }
+    button.send:active { background: #000; }
+
+    .response-box {
+      margin-top: 12px;
+      background: #f9f9f9;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-family: monospace;
+      font-size: 12px;
+      min-height: 40px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: #333;
+      display: none;
+    }
+    .response-box.visible { display: block; }
+    .response-box.ok   { border-left: 3px solid #4caf50; }
+    .response-box.err  { border-left: 3px solid #f44336; }
+    .response-box.pending { border-left: 3px solid #ff9800; color: #888; }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .stat {
+      background: #f5f5f5;
+      border-radius: 6px;
+      padding: 10px 12px;
+    }
+    .stat .label { font-size: 11px; color: #888; margin-bottom: 2px; }
+    .stat .value { font-size: 15px; font-weight: 600; }
+
+    .log-area {
+      background: #1a1a1a;
+      color: #e0e0e0;
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-family: monospace;
+      font-size: 12px;
+      margin-top: 20px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+    .log-area .log-line { line-height: 1.7; }
+    .log-area .log-ok   { color: #81c784; }
+    .log-area .log-err  { color: #e57373; }
+    .log-area .log-info { color: #64b5f6; }
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      margin-bottom: 6px;
+    }
+    .log-header span { font-size: 13px; font-weight: 500; color: #555; }
+    .log-header button {
+      font-size: 12px;
+      background: none;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 3px 10px;
+      cursor: pointer;
+      color: #555;
+    }
+    .log-header button:hover { background: #f0f0f0; }
+  </style>
+</head>
+<body>
+
+  <h1>Attendance backend tester</h1>
+  <p class="subtitle">Sends real HTTP requests to your running Flask server. Make sure app.py is running first.</p>
+
+  <div class="config-bar">
+    <label for="base-url">Base URL</label>
+    <input id="base-url" type="text" value="http://localhost:5000" />
+    <label for="api-key">X-API-Key</label>
+    <input id="api-key" type="text" value="replace_this_with_a_long_random_string" />
+  </div>
+
+  <div class="grid">
+
+    <!-- /scan -->
+    <div class="card">
+      <div class="card-header">
+        <span class="method post">POST</span>
+        <h2>Scan RFID</h2>
+        <span class="route-badge">/scan</span>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label>UID (8–14 hex chars, e.g. A1B2C3D4)</label>
+          <input id="scan-uid" type="text" value="A1B2C3D4" maxlength="14" />
+        </div>
+        <button class="send" onclick="doScan()">Send scan</button>
+        <div class="response-box" id="scan-res"></div>
+      </div>
+    </div>
+
+    <!-- /manual -->
+    <div class="card">
+      <div class="card-header">
+        <span class="method post">POST</span>
+        <h2>Manual entry</h2>
+        <span class="route-badge">/manual</span>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label>Name</label>
+          <input id="manual-name" type="text" value="Juan dela Cruz" />
+        </div>
+        <div class="field">
+          <label>ID number (positive integer)</label>
+          <input id="manual-id" type="number" value="20240001" min="1" />
+        </div>
+        <div class="field">
+          <label>Purpose</label>
+          <input id="manual-purpose" type="text" value="Library visit" />
+        </div>
+        <button class="send" onclick="doManual()">Send manual entry</button>
+        <div class="response-box" id="manual-res"></div>
+      </div>
+    </div>
+
+    <!-- /environment -->
+    <div class="card">
+      <div class="card-header">
+        <span class="method post">POST</span>
+        <h2>DHT11 reading</h2>
+        <span class="route-badge">/environment</span>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label>Temperature (°C, -50 to 100)</label>
+          <input id="env-temp" type="number" value="27.5" step="0.1" />
+        </div>
+        <div class="field">
+          <label>Humidity (%, 0 to 100)</label>
+          <input id="env-hum" type="number" value="65.0" step="0.1" />
+        </div>
+        <button class="send" onclick="doEnvironment()">Send sensor data</button>
+        <div class="response-box" id="env-res"></div>
+      </div>
+    </div>
+
+    <!-- /status -->
+    <div class="card">
+      <div class="card-header">
+        <span class="method get">GET</span>
+        <h2>Poll status</h2>
+        <span class="route-badge">/status</span>
+      </div>
+      <div class="card-body">
+        <div class="status-grid">
+          <div class="stat"><div class="label">Temperature</div><div class="value" id="st-temp">—</div></div>
+          <div class="stat"><div class="label">Humidity</div><div class="value" id="st-hum">—</div></div>
+        </div>
+        <button class="send" onclick="doStatus()">Get status</button>
+        <div class="response-box" id="status-res"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="log-header">
+    <span>Request log</span>
+    <button onclick="clearLog()">Clear</button>
+  </div>
+  <div class="log-area" id="log"></div>
+
+  <script>
+    function base() { return document.getElementById('base-url').value.replace(/\/$/, ''); }
+    function apiKey() { return document.getElementById('api-key').value; }
+
+    function headers(includeKey) {
+      const h = { 'Content-Type': 'application/json' };
+      if (includeKey) h['X-API-Key'] = apiKey();
+      return h;
+    }
+
+    function showRes(id, data, ok) {
+      const el = document.getElementById(id);
+      el.textContent = JSON.stringify(data, null, 2);
+      el.className = 'response-box visible ' + (ok ? 'ok' : 'err');
+    }
+
+    function log(msg, type) {
+      const box = document.getElementById('log');
+      const line = document.createElement('div');
+      line.className = 'log-line log-' + (type || 'info');
+      const ts = new Date().toLocaleTimeString();
+      line.textContent = '[' + ts + '] ' + msg;
+      box.appendChild(line);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function clearLog() {
+      document.getElementById('log').innerHTML = '';
+    }
+
+    async function request(method, path, body, resId, includeKey) {
+      const url = base() + path;
+      const el = document.getElementById(resId);
+      el.textContent = 'Sending...';
+      el.className = 'response-box visible pending';
+      log(method + ' ' + url, 'info');
+      try {
+        const opts = { method, headers: headers(includeKey) };
+        if (body) opts.body = JSON.stringify(body);
+        const res = await fetch(url, opts);
+        const json = await res.json();
+        const ok = res.ok;
+        showRes(resId, json, ok);
+        log(res.status + ' ' + JSON.stringify(json), ok ? 'ok' : 'err');
+        return json;
+      } catch (e) {
+        const msg = { error: e.message || 'Network error — is Flask running?' };
+        showRes(resId, msg, false);
+        log('ERROR: ' + e.message, 'err');
+      }
+    }
+
+    async function doScan() {
+      const uid = document.getElementById('scan-uid').value.trim().toUpperCase();
+      await request('POST', '/scan', { uid }, 'scan-res', true);
+    }
+
+    async function doManual() {
+      const name    = document.getElementById('manual-name').value.trim();
+      const id      = parseInt(document.getElementById('manual-id').value, 10);
+      const purpose = document.getElementById('manual-purpose').value.trim();
+      await request('POST', '/manual', { name, id, purpose }, 'manual-res', true);
+    }
+
+    async function doEnvironment() {
+      const temperature = parseFloat(document.getElementById('env-temp').value);
+      const humidity    = parseFloat(document.getElementById('env-hum').value);
+      await request('POST', '/environment', { temperature, humidity }, 'env-res', true);
+    }
+
+    async function doStatus() {
+      const data = await request('GET', '/status', null, 'status-res', false);
+      if (data && data.environment) {
+        document.getElementById('st-temp').textContent = data.environment.temperature.toFixed(1) + ' °C';
+        document.getElementById('st-hum').textContent  = data.environment.humidity.toFixed(1) + ' %';
+      }
+    }
+  </script>
+
+</body>
+</html>
