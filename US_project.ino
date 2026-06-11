@@ -1,4 +1,5 @@
 
+// change pin number based on esp32
 int trigpin=1;
 int echopin=2;
 int yellowpin=4;
@@ -9,11 +10,9 @@ int echopin2=8;
 float t; //time of first sensor
 int d;//distance of first sensor
 int duration;
-int servopin=6;
+int relaypin=6;// for pump,relay should output from NO
 float t2;// time of 2nd sensor
 int d2;// distance of 2nd sensor
-#include <ESP32Servo.h>
-Servo servo;// servo is a vraiable
 bool RFID = false;
 unsigned long present_time=0;
 unsigned long interval = 3000;
@@ -25,6 +24,9 @@ void setup(){
 
   pinMode(yellowpin,OUTPUT);
   pinMode(redpin,OUTPUT);
+  pinMode(greenpin,OUTPUT);
+
+  pinMode(relaypin,OUTPUT);
 
   pinMode(trigpin2,OUTPUT);
   pinMode(echopin2,INPUT);
@@ -38,9 +40,6 @@ void setup(){
   digitalWrite(yellowpin,0);
   digitalWrite(greenpin,0);
   
-
-  servo.attach(servopin);
-  servo.write(0);
 
   
  
@@ -91,11 +90,9 @@ void sensor_read2(){
         present_time=millis();
       }
       if (millis()-present_time>=interval){
-        servo.write(90);
-        delay(800);
-        servo.write(0);
-        delay(500);
-
+        digitalWrite(relaypin,1);
+        delay(1000);
+        digitalWrite(relaypin,0);
         digitalWrite(greenpin,0);
         RFID=false;
         present_time=0;
