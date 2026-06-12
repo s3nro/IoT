@@ -34,17 +34,17 @@ def init_db():
     cursor = conn.cursor()
 
     cursor.execute('''CREATE TABLE IF NOT EXISTS users (
-        uid        TEXT    PRIMARY KEY,
-        name       TEXT    NOT NULL,
-        id_number  INTEGER NOT NULL,
+        uid        TEXT PRIMARY KEY,
+        name       TEXT NOT NULL,
+        id_number  TEXT NOT NULL,
         photo_path TEXT
     )''')
 
     cursor.execute('''CREATE TABLE IF NOT EXISTS attendance (
-        timestamp  TEXT    NOT NULL,
-        name       TEXT    NOT NULL,
-        id_number  INTEGER NOT NULL,
-        entry_type TEXT    NOT NULL,
+        timestamp  TEXT NOT NULL,
+        name       TEXT NOT NULL,
+        id_number  TEXT NOT NULL,
+        entry_type TEXT NOT NULL,
         purpose    TEXT
     )''')
 
@@ -85,13 +85,9 @@ def validate_string(val, max_length=50):
     return bool(re.match(r'^[a-zA-Z0-9\s\-\.,]+$', val))
 
 def validate_id_number(val):
-    try:
-        n = int(val)
-        if n <= 0:
-            return False, None
-        return True, n
-    except (ValueError, TypeError):
+    if not isinstance(val, str) or len(val) == 0 or len(val) > 50:
         return False, None
+    return True, val
 
 def validate_float(val, min_val, max_val):
     try:
@@ -166,9 +162,9 @@ def manual():
     name    = str(data['name']).strip()
     purpose = str(data['purpose']).strip()
 
-    ok, id_number = validate_id_number(data['id'])
+    ok, id_number = validate_id_number(str(data['id']).strip())
     if not ok:
-        return jsonify({"error": "Invalid Input: id must be a positive integer"}), 400
+        return jsonify({"error": "Invalid Input: id must be a non-empty string"}), 400
 
     if not validate_string(name) or not validate_string(purpose, 100):
         return jsonify({"error": "Invalid Input"}), 400
