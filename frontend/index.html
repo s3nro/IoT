@@ -325,9 +325,11 @@
     const purpose = document.getElementById('f-purpose').value.trim();
     if (!name || !id || !purpose) { alert('Please fill in all fields.'); return; }
 
-    fetch('/manual', {
+    fetch('http://127.0.0.1:5000/manual', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json',
+        'X-API-Key': 'HotdogNiAljur123'
+       },
       body: JSON.stringify({ name, id: id, purpose })
     }).then(() => showAuthorized(name, id, null))
       .catch(() => showAuthorized(name, id, null));
@@ -335,7 +337,7 @@
 
   // Poll /status every 5 seconds for env bar updates
   function pollStatus() {
-    fetch('/status')
+    fetch('http://127.0.0.1:5000/status')
       .then(r => r.json())
       .then(data => {
         if (data.environment) {
