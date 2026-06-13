@@ -10,10 +10,7 @@ load_dotenv()  # reads .env file into os.environ
 
 app = Flask(__name__)
 
-# Allows requests from the local tester HTML (file:// or localhost)
-CORS(app, origins=["http://localhost:5000", "http://127.0.0.1:5000",
-                   "http://localhost:8080", "http://127.0.0.1:8080",
-                   "null"],          # "null" = file:// origin in browsers
+CORS(app, origins="*",
      allow_headers=["Content-Type", "X-API-Key"],
      methods=["GET", "POST", "OPTIONS"])
 
