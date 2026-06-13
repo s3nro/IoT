@@ -289,10 +289,17 @@
   <div class="footer">AGAP &nbsp;·&nbsp; IoT Monitoring System</div>
 </div>
 
-<audio id="audio-authorized" src="http://127.0.0.1:5000/static/audio/authorized.mp3" preload="none"></audio>
-<audio id="audio-denied"     src="http://127.0.0.1:5000/static/audio/denied.mp3"     preload="none"></audio>
+<audio id="audio-authorized" src="" preload="none"></audio>
+<audio id="audio-denied"     src="" preload="none"></audio>
 
 <script>
+  // Dynamically set server URL based on current host (works on localhost, LAN, and remote IPs)
+  const SERVER_URL = `http://${window.location.hostname}:5000`;
+  
+  // Set audio sources dynamically
+  document.getElementById('audio-authorized').src = SERVER_URL + '/static/audio/authorized.mp3';
+  document.getElementById('audio-denied').src = SERVER_URL + '/static/audio/denied.mp3';
+
   function showScreen(name) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('s-' + name).classList.add('active');
@@ -325,7 +332,7 @@
   const purpose = document.getElementById('f-purpose').value.trim();
   if (!name || !id || !purpose) { alert('Please fill in all fields.'); return; }
 
-  fetch('http://127.0.0.1:5000/manual', {
+  fetch(SERVER_URL + '/manual', {
     method: 'POST',
     headers: { 
       'Content-Type': 'application/json',
@@ -346,7 +353,7 @@
 }
   // Poll /status every 5 seconds for env bar updates
   function pollStatus() {
-    fetch('http://127.0.0.1:5000/status')
+    fetch(SERVER_URL + '/status')
       .then(r => r.json())
       .then(data => {
         if (data.environment) {
