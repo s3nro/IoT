@@ -245,7 +245,7 @@
       <div class="screen-sub">Card not recognized</div>
       <div class="badge badge-danger" style="margin-top: 6px;">Unauthorized</div>
       <div class="divider"></div>
-      <button class="btn" onclick="showScreen('manual')">Input manually instead</button>
+      <button class="btn btn-primary" type="button" onclick="submitManual()">Submit and proceed</button>
     </div>
 
     <!-- MANUAL -->
@@ -266,7 +266,7 @@
         <label>Purpose of visit</label>
         <input type="text" id="f-purpose" placeholder="e.g. Consultation" />
       </div>
-      <button class="btn btn-primary" onclick="submitManual()">Submit and proceed</button>
+      <button class="btn btn-primary" type="button" onclick="submitManual(event)">Submit and proceed</button>
     </div>
 
   </div>
@@ -289,8 +289,8 @@
   <div class="footer">AGAP &nbsp;·&nbsp; IoT Monitoring System</div>
 </div>
 
-<audio id="audio-authorized" src="./audio/authorized.mp3" preload="auto"></audio>
-<audio id="audio-denied"     src="./audio/denied.mp3"     preload="auto"></audio>
+<audio id="audio-authorized" src="http://127.0.0.1:5000/static/audio/authorized.mp3" preload="none"></audio>
+<audio id="audio-denied"     src="http://127.0.0.1:5000/static/audio/denied.mp3"     preload="none"></audio>
 
 <script>
   function showScreen(name) {
@@ -350,8 +350,15 @@
       .then(r => r.json())
       .then(data => {
         if (data.environment) {
-          document.getElementById('env-temp').textContent     = data.environment.temperature + '°C';
-          document.getElementById('env-humidity').textContent = data.environment.humidity + '%';
+          const ts = new Date(data.environment.timestamp);
+          const age =(Date.now() - ts.getTime()) / 1000; // seconds
+          if (age < 120) {
+            document.getElementById('env-temp').textContent     = data.environment.temperature + '°C';
+            document.getElementById('env-humidity').textContent = data.environment.humidity + '%';
+          } else {
+            document.getElementById('env-temp').textContent     = '--°C';
+            document.getElementById('env-humidity').textContent = '--%';
+          }
         }
         document.getElementById('env-status').textContent = 'Online';
         document.getElementById('env-status').style.color = 'var(--green)';
